@@ -1,0 +1,167 @@
+function connect4() {
+  
+  const sheet = SpreadsheetApp.getActive().getSheetByName('Connect4')
+
+  var winner = 0
+
+  var pieceplaced = 0
+
+  var pieceheight
+
+  if (sheet.getRange('A10').isChecked()) {
+    var currentturn = 'YELLOW'
+    var currentcolor = '#ffd966'
+    var nextturn = 'RED'
+    var nextcolor = '#e06666'
+  } else {
+    var currentturn = 'RED'
+    var currentcolor = '#e06666'
+    var nextturn = 'YELLOW'
+    var nextcolor = '#ffd966'
+  }
+
+  var varholder = ''
+
+  sheet.getRange('A3:G8').setBackground('#ffffff')
+  sheet.getRange('A2:G2').uncheck()
+  sheet.getRange('A1').setValue('It is '+currentturn+"'s turn").setBackground(currentcolor)
+  //resets the board, the checkboxes, and the turn display
+
+  while (winner == 0) {
+
+    SpreadsheetApp.flush()
+
+    for (i=0; i<7; i++) {
+
+      if (sheet.getRange('A2').offset(0,i).isChecked()) {
+        sheet.getRange('A2').offset(0,i).uncheck()
+
+        for (j=0; j<6; j++) {
+
+          if (sheet.getRange('A3').offset(j,i).getBackground() == '#ffffff') {
+
+            pieceplaced = 1
+            pieceheight = j+3
+            sheet.getRange('A3').offset(j,i).setBackground(sheet.getRange('A1').getBackground())
+            sheet.getRange('A3').offset(j-1,i).setBackground('#ffffff')
+            Utilities.sleep(30)
+          } else {break}
+        }
+
+        if (pieceplaced == 1) {
+          pieceplaced = 0
+          winner = checkforwin(sheet, i+1, pieceheight)
+
+          if (winner!=0) {
+            break
+          }
+
+          varholder = currentturn
+          currentturn = nextturn
+          nextturn = varholder
+          varholder = currentcolor
+          currentcolor = nextcolor
+          nextcolor = varholder
+          varholder = ''
+          sheet.getRange('A1').setValue('It is '+currentturn+"'s turn").setBackground(currentcolor)
+          
+        }
+      }
+    }
+  }
+  if (winner == 2) {
+    sheet.getRange('A1').setValue("It's a tie!").setBackground('#6d9eeb')
+  } else {sheet.getRange('A1').setValue(currentturn+' is the winner!')}
+}
+
+function checkforwin (sheet, x, y) {
+  
+  var piecepos = sheet.getRange(y,x)
+
+  var piececolor = piecepos.getBackground()
+
+  var vertinarow = 1 + inarow(sheet, piececolor, piecepos, 'up') + inarow(sheet, piececolor, piecepos, 'down')
+
+  var horizinarow = 1 + inarow(sheet, piececolor, piecepos, 'right') + inarow(sheet, piececolor, piecepos, 'left')
+
+  var upleftinarow = 1 + inarow(sheet, piececolor, piecepos, 'upleft') + inarow(sheet, piececolor, piecepos, 'downright')
+
+  var uprightinarow = 1 + inarow(sheet, piececolor, piecepos, 'upright') + inarow(sheet, piececolor, piecepos, 'downleft')
+
+  if (vertinarow>=4 || horizinarow>=4 || upleftinarow>=4 || uprightinarow>=4) {
+    return(1)
+  }
+
+  var allcolors = sheet.getRange('A3:G8').getBackgrounds()
+  for (i=0; i<6; i++) {
+    for (j=0; j<5; j++) {
+      if (allcolors[i][j]=='#ffffff') {
+        return(0)
+      }
+    }
+  }
+  return(2)
+}
+
+function inarow (sheet, piececolor, piecepos, direction) {
+
+  var counter = 0
+
+  if (direction == 'up') {
+
+    if (piecepos.getRow()!=3 && piecepos.offset(-1, 0).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(-1, 0), direction) + 1
+    }
+  }
+
+  if (direction == 'left') {
+
+    if (piecepos.getColumn()!=1 && piecepos.offset(0, -1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(0, -1), direction) + 1
+    }
+  }
+
+  if (direction == 'down') {
+
+    if (piecepos.getRow()!=8 && piecepos.offset(1, 0).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(1, 0), direction) + 1
+    }
+  }
+
+  if (direction == 'right') {
+
+    if (piecepos.getColumn()!=7 && piecepos.offset(0, 1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(0, 1), direction) + 1
+    }
+  }
+
+  if (direction == 'upleft') {
+
+    if (piecepos.getRow()!=3 && piecepos.getColumn()!=1 && piecepos.offset(-1, -1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(-1, -1), direction) + 1
+    }
+  }
+
+  if (direction == 'downleft') {
+
+    if (piecepos.getRow()!=8 && piecepos.getColumn()!=1 && piecepos.offset(1, -1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(1, -1), direction) + 1
+    }
+  }
+
+  if (direction == 'downright') {
+
+    if (piecepos.getRow()!=8 && piecepos.getColumn()!=7 && piecepos.offset(1, 1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(1, 1), direction) + 1
+    }
+  }
+
+  if (direction == 'upright') {
+
+    if (piecepos.getRow()!=3 && piecepos.getColumn()!=7 && piecepos.offset(-1, 1).getBackground() == piececolor) {
+      counter = inarow(sheet, piececolor, piecepos.offset(-1, 1), direction) + 1
+    }
+  }
+
+  return(counter)
+}
