@@ -1,2 +1,4 @@
 # Spreadsheet-Games
-A collection of recreations of classic games within Google Sheets
+A collection of recreations of classic games within Google Sheets (and some of my first actual coding projects so some things are pretty gross and poorly optimized)
+# Snake
+As it turns out, applying the visual changes to the sheet takes quite a long time, so the snake moves pretty slow... But it's perfectly functional snake other than that. Controlled by checking 4 different checkboxes on the sheet corresponding to each direction. Each apple collected increases the snake's length by one and collisions with the body or the wall will end the game. Keeps track of high score. Unfortunately Google's scripts will only run for a maximum of 5 minutes, and if this time is exceeded then the script ends prematurely. I was unaware of this when making this game, so playing it for longer than 5 minutes is impossible.
